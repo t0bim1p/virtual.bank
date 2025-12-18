@@ -1,0 +1,768 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teardown Statue Casino 2025</title>
+    <style>
+        :root {
+            --vbr-color: #ffcc00; --vbt-color: #00ccff;
+            --common: #b0c3d9; --rare: #4b69ff; --mythical: #8847ff; --legendary: #d32ce6; --ancient: #eb4b4b;
+            --bg: #121212; --card-bg: #1e1e1e;
+            --gold: #ffd700; --silver: #c0c0c0; --bronze: #cd7f32;
+        }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: white; margin: 0; overflow-x: hidden; }
+        
+        /* Навигация */
+        nav { display: flex; background: #000; padding: 10px; position: sticky; top: 0; z-index: 100; border-bottom: 2px solid #333; }
+        nav button { background: none; border: none; color: #aaa; padding: 10px 20px; cursor: pointer; font-size: 16px; transition: 0.3s; }
+        nav button.active { color: white; border-bottom: 2px solid var(--vbr-color); }
+        .balance-bar { margin-left: auto; display: flex; gap: 20px; align-items: center; padding-right: 20px; }
+        .user-info { display: flex; align-items: center; gap: 10px; }
+
+        /* Страницы */
+        .page { display: none; padding: 20px; max-width: 1200px; margin: auto; animation: fadeIn 0.5s; }
+        .page.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        /* Стили карточек */
+        .statue-card {
+            background: var(--card-bg); border-radius: 8px; padding: 15px; text-align: center;
+            border-bottom: 4px solid var(--common); position: relative; transition: 0.2s; cursor: pointer;
+        }
+        .statue-card:hover { transform: translateY(-5px); background: #252525; }
+        .icon { font-size: 50px; margin-bottom: 10px; display: block; }
+        .price { font-weight: bold; color: var(--vbr-color); }
+        .rarity-text { font-size: 10px; text-transform: uppercase; letter-spacing: 1px; }
+
+        /* Кейсы */
+        .cases-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 20px; }
+        .case-preview { background: #2a2a2a; padding: 15px; border: 1px dashed #555; margin-bottom: 20px; display: flex; gap: 10px; overflow-x: auto; }
+
+        /* Рулетка CS */
+        .roulette-wrapper { width: 100%; height: 160px; position: relative; overflow: hidden; background: #000; border: 2px solid #333; margin: 20px 0; }
+        .roulette-track { display: flex; position: absolute; left: 0; top: 0; transition: transform 5s cubic-bezier(0.1, 0, 0.1, 1); }
+        .selector { position: absolute; left: 50%; top: 0; width: 4px; height: 100%; background: red; z-index: 5; transform: translateX(-50%); box-shadow: 0 0 10px red; }
+
+        /* Апгрейдер */
+        .upgrader-container { display: flex; justify-content: space-around; align-items: center; flex-wrap: wrap; gap: 30px; }
+        .wheel-box { position: relative; width: 300px; height: 300px; }
+        .wheel-svg { transform: rotate(-90deg); }
+        .wheel-bg { fill: #333; }
+        .wheel-chance { fill: transparent; stroke: #4CAF50; stroke-width: 32; stroke-dasharray: 0 100; transition: 0.5s; }
+        .wheel-arrow { position: absolute; top: 0; left: 50%; width: 4px; height: 50%; background: #fff; transform-origin: bottom; transition: 4s cubic-bezier(0.15, 0, 0.15, 1); z-index: 10; }
+
+        /* Модальные окна */
+        .modal { position: fixed; top:0; left:0; width: 100%; height:100%; background: rgba(0,0,0,0.9); z-index: 200; display:none; justify-content: center; align-items: center; }
+        .modal-content { background: #222; padding: 30px; border-radius: 10px; max-width: 800px; max-height: 80vh; overflow-y: auto; width: 90%; }
+        
+        /* Редкости */
+        .r-common { border-color: var(--common); } .r-rare { border-color: var(--rare); }
+        .r-mythical { border-color: var(--mythical); } .r-legendary { border-color: var(--legendary); }
+        .r-ancient { border-color: var(--ancient); box-shadow: 0 0 15px var(--ancient); }
+
+        /* Таблица лидеров */
+        .leaderboard-table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        .leaderboard-table th { background: #333; padding: 12px; text-align: left; }
+        .leaderboard-table td { padding: 12px; border-bottom: 1px solid #444; }
+        .leaderboard-table tr:hover { background: #2a2a2a; }
+        .medal-1 { color: var(--gold); font-weight: bold; }
+        .medal-2 { color: var(--silver); font-weight: bold; }
+        .medal-3 { color: var(--bronze); font-weight: bold; }
+
+        /* Форма авторизации */
+        .auth-container { max-width: 400px; margin: 100px auto; background: #1e1e1e; padding: 40px; border-radius: 10px; }
+        .auth-input { width: 100%; padding: 12px; margin: 10px 0; background: #333; border: 1px solid #555; color: white; border-radius: 5px; }
+        .auth-btn { width: 100%; padding: 15px; background: var(--vbr-color); border: none; color: black; font-weight: bold; border-radius: 5px; cursor: pointer; }
+        .auth-tabs { display: flex; margin-bottom: 20px; }
+        .auth-tab { flex: 1; padding: 10px; text-align: center; background: #333; cursor: pointer; }
+        .auth-tab.active { background: var(--vbr-color); color: black; }
+
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body>
+
+<!-- ЭКРАН АВТОРИЗАЦИИ -->
+<div id="auth-screen">
+    <div class="auth-container">
+        <h2 style="text-align: center;">Teardown Statue Casino</h2>
+        <div class="auth-tabs">
+            <div class="auth-tab active" onclick="showAuthTab('login')">Вход</div>
+            <div class="auth-tab" onclick="showAuthTab('register')">Регистрация</div>
+        </div>
+        
+        <div id="login-form">
+            <input type="text" class="auth-input" id="login-name" placeholder="Имя пользователя">
+            <input type="password" class="auth-input" id="login-pass" placeholder="Пароль">
+            <button class="auth-btn" onclick="login()">Войти</button>
+        </div>
+        
+        <div id="register-form" class="hidden">
+            <input type="text" class="auth-input" id="register-name" placeholder="Имя пользователя">
+            <input type="password" class="auth-input" id="register-pass" placeholder="Пароль">
+            <input type="password" class="auth-input" id="register-pass2" placeholder="Повторите пароль">
+            <button class="auth-btn" onclick="register()">Зарегистрироваться</button>
+        </div>
+        
+        <p style="text-align: center; margin-top: 20px; color: #aaa;">Все данные сохраняются локально</p>
+    </div>
+</div>
+
+<!-- ОСНОВНОЙ ИНТЕРФЕЙС -->
+<div id="main-interface" class="hidden">
+    <nav>
+        <div class="user-info">
+            <span id="username-display">Гость</span>
+            <button onclick="logout()" style="background: #555; padding: 5px 10px; font-size: 12px;">Выйти</button>
+        </div>
+        <button onclick="showPage('cases')" id="nav-cases">Кейсы</button>
+        <button onclick="showPage('inventory')" id="nav-inventory">Инвентарь</button>
+        <button onclick="showPage('upgrader')" id="nav-upgrader">Апгрейдер</button>
+        <button onclick="showPage('exchange')" id="nav-exchange">Обменник</button>
+        <button onclick="showPage('leaderboard')" id="nav-leaderboard">Лидеры</button>
+        <div class="balance-bar">
+            <span title="Курс: 1₱ ≈ 15 руб">Баланс: <b id="bal-vbr">0</b> ₱</span>
+            <span title="Курс: 1₸ ≈ 35 руб"><b id="bal-vbt">0</b> ₸</span>
+        </div>
+    </nav>
+
+    <!-- СТРАНИЦА КЕЙСОВ -->
+    <div id="page-cases" class="page active">
+        <h2>Доступные кейсы</h2>
+        <div class="cases-grid" id="cases-list"></div>
+        
+        <div id="opening-section" style="display:none; margin-top: 40px;">
+            <h3 id="current-case-name">Открытие...</h3>
+            <div class="roulette-wrapper">
+                <div class="selector"></div>
+                <div class="roulette-track" id="roulette-track"></div>
+            </div>
+            <button id="btn-open-action" style="padding: 15px 40px; font-size: 20px; background: #4CAF50; border: none; color: white; border-radius: 5px; cursor: pointer;">КРУТИТЬ</button>
+        </div>
+    </div>
+
+    <!-- СТРАНИЦА ИНВЕНТАРЯ -->
+    <div id="page-inventory" class="page">
+        <h2>Мой инвентарь</h2>
+        <div class="cases-grid" id="inventory-list"></div>
+        <div style="margin-top: 30px; padding: 20px; background: #1e1e1e; border-radius: 8px;">
+            <h3>Стоимость инвентаря: <span id="inventory-value">0</span> ₱</h3>
+        </div>
+    </div>
+
+    <!-- СТРАНИЦА АПГРЕЙДЕРА -->
+    <div id="page-upgrader" class="page">
+        <h2>Апгрейдер Статуй</h2>
+        <div class="upgrader-container">
+            <div class="statue-card" onclick="openPicker('my')" id="upg-source">
+                <span class="icon">➕</span><p>Выберите свой предмет</p>
+            </div>
+
+            <div class="wheel-box">
+                <svg class="wheel-svg" viewBox="0 0 32 32" width="100%" height="100%">
+                    <circle class="wheel-bg" r="16" cx="16" cy="16"></circle>
+                    <circle id="wheel-segment" class="wheel-chance" r="16" cx="16" cy="16" stroke-dasharray="0 100"></circle>
+                </svg>
+                <div class="wheel-arrow" id="upg-arrow"></div>
+                <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center;">
+                    <span id="chance-text" style="font-size: 24px; font-weight: bold;">0%</span>
+                </div>
+            </div>
+
+            <div class="statue-card" onclick="openPicker('target')" id="upg-target">
+                <span class="icon">🎯</span><p>Выберите цель</p>
+            </div>
+        </div>
+        <div style="text-align: center; margin-top: 40px;">
+            <button onclick="startUpgrade()" style="padding: 20px 60px; background: #e67e22; color: white; border: none; font-size: 24px; border-radius: 10px; cursor: pointer;">АПГРЕЙД</button>
+        </div>
+    </div>
+
+    <!-- СТРАНИЦА ОБМЕННИКА -->
+    <div id="page-exchange" class="page">
+        <h2>Обмен валют</h2>
+        <div style="background: #222; padding: 20px; border-radius: 10px;">
+            <p>Курс: 1 ₸ = 2.32 ₱ (на основе ваших данных)</p>
+            <input type="number" id="exch-amount" placeholder="Количество ₸">
+            <button onclick="exchangeVBTtoVBR()" style="background: var(--vbt-color); color: black;">Обменять ₸ на ₱</button>
+        </div>
+    </div>
+
+    <!-- СТРАНИЦА ЛИДЕРБОРДА -->
+    <div id="page-leaderboard" class="page">
+        <h2>Таблица лидеров</h2>
+        
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-top: 30px;">
+            <div>
+                <h3>🏆 По деньгам (₱ + ₸)</h3>
+                <table class="leaderboard-table">
+                    <thead>
+                        <tr>
+                            <th width="50">#</th>
+                            <th>Игрок</th>
+                            <th>Общий баланс</th>
+                        </tr>
+                    </thead>
+                    <tbody id="leaderboard-money">
+                        <tr><td colspan="3">Загрузка...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+            
+            <div>
+                <h3>📦 По стоимости инвентаря</h3>
+                <table class="leaderboard-table">
+                    <thead>
+                        <tr>
+                            <th width="50">#</th>
+                            <th>Игрок</th>
+                            <th>Стоимость инвентаря</th>
+                        </tr>
+                    </thead>
+                    <tbody id="leaderboard-inventory">
+                        <tr><td colspan="3">Загрузка...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+        <div style="margin-top: 40px; background: #1e1e1e; padding: 20px; border-radius: 8px;">
+            <h3>Ваше место в рейтингах:</h3>
+            <p>• По деньгам: <span id="user-money-rank">-</span> место</p>
+            <p>• По инвентарю: <span id="user-inventory-rank">-</span> место</p>
+        </div>
+    </div>
+
+    <!-- МОДАЛКА ВЫБОРА ПРЕДМЕТОВ -->
+    <div id="picker-modal" class="modal">
+        <div class="modal-content">
+            <h2 id="picker-title">Выберите предмет</h2>
+            <div class="cases-grid" id="picker-grid"></div>
+            <button onclick="closePicker()" style="margin-top: 20px;">Закрыть</button>
+        </div>
+    </div>
+</div>
+
+<script>
+/** КОНФИГУРАЦИЯ ДАННЫХ **/
+const RARITIES = {
+    common: { name: 'Обычное', color: '#b0c3d9' },
+    rare: { name: 'Редкое', color: '#4b69ff' },
+    mythical: { name: 'Мифическое', color: '#8847ff' },
+    legendary: { name: 'Легендарное', color: '#d32ce6' },
+    ancient: { name: 'Древнее', color: '#eb4b4b' }
+};
+
+const ITEMS = [
+    { id: 's1', name: 'Каменный Кот', icon: '🐱', price: 10, rarity: 'common' },
+    { id: 's2', name: 'Медная Собака', icon: '🐶', price: 25, rarity: 'common' },
+    { id: 's3', name: 'Бронзовая Свинья', icon: '🐷', price: 50, rarity: 'rare' },
+    { id: 's4', name: 'Серебряный Волк', icon: '🐺', price: 150, rarity: 'rare' },
+    { id: 's5', name: 'Золотой Лев', icon: '🦁', price: 450, rarity: 'mythical' },
+    { id: 's6', name: 'Платиновый Дракон', icon: '🐲', price: 1200, rarity: 'legendary' },
+    { id: 'kotartur', name: 'Изумрудная "КОТАРТУР"', icon: '🐈', price: 5000, rarity: 'legendary' },
+    { id: 'hopikai', name: 'Алмазная "ХОПИКАЙС"', icon: '💎', price: 15000, rarity: 'ancient' },
+    { id: 'tobi', name: 'Рубиновая "ТОБИ"', icon: '🐕', price: 50000, rarity: 'ancient' }
+];
+
+const CASES = [
+    { id: 'c1', name: 'Звериный Кейс', price: 100, items: ['s1', 's1', 's2', 's3', 's4'] },
+    { id: 'c2', name: 'Элитный Кейс', price: 1500, items: ['s4', 's5', 's6', 'kotartur'] },
+    { id: 'c3', name: 'Кейс Богов', price: 10000, items: ['s6', 'kotartur', 'hopikai', 'tobi'] }
+];
+
+/** СИСТЕМА ПОЛЬЗОВАТЕЛЕЙ **/
+const USERS_KEY = 'teardown_casino_users_v2';
+const CURRENT_USER_KEY = 'teardown_current_user';
+
+let currentUser = null;
+let currentUpgSource = null;
+let currentUpgTarget = null;
+let isOpening = false;
+
+/** ЛОГИКА АВТОРИЗАЦИИ **/
+function showAuthTab(tab) {
+    document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.auth-tab').forEach(t => {
+        if (t.textContent === (tab === 'login' ? 'Вход' : 'Регистрация')) {
+            t.classList.add('active');
+        }
+    });
+    
+    document.getElementById('login-form').classList.toggle('hidden', tab !== 'login');
+    document.getElementById('register-form').classList.toggle('hidden', tab !== 'register');
+}
+
+function login() {
+    const username = document.getElementById('login-name').value.trim();
+    const password = document.getElementById('login-pass').value;
+    
+    if (!username || !password) {
+        alert("Заполните все поля!");
+        return;
+    }
+    
+    const users = getUsers();
+    const user = users.find(u => u.username === username && u.password === password);
+    
+    if (user) {
+        currentUser = user;
+        localStorage.setItem(CURRENT_USER_KEY, JSON.stringify(user));
+        showMainInterface();
+        updateUI();
+        alert(`Добро пожаловать, ${username}!`);
+    } else {
+        alert("Неверное имя пользователя или пароль!");
+    }
+}
+
+function register() {
+    const username = document.getElementById('register-name').value.trim();
+    const password = document.getElementById('register-pass').value;
+    const password2 = document.getElementById('register-pass2').value;
+    
+    if (!username || !password) {
+        alert("Заполните все поля!");
+        return;
+    }
+    
+    if (password !== password2) {
+        alert("Пароли не совпадают!");
+        return;
+    }
+    
+    if (username.length < 3) {
+        alert("Имя пользователя должно быть не менее 3 символов!");
+        return;
+    }
+    
+    if (password.length < 4) {
+        alert("Пароль должен быть не менее 4 символов!");
+        return;
+    }
+    
+    const users = getUsers();
+    
+    if (users.find(u => u.username === username)) {
+        alert("Пользователь с таким именем уже существует!");
+        return;
+    }
+    
+    const newUser = {
+        username: username,
+        password: password,
+        vbr: 5000,
+        vbt: 100,
+        inventory: [],
+        createdAt: new Date().toISOString()
+    };
+    
+    users.push(newUser);
+    localStorage.setItem(USERS_KEY, JSON.stringify(users));
+    
+    currentUser = newUser;
+    localStorage.setItem(CURRENT_USER_KEY, JSON.stringify(newUser));
+    showMainInterface();
+    updateUI();
+    alert(`Регистрация успешна! Добро пожаловать, ${username}!`);
+}
+
+function logout() {
+    if (confirm("Вы уверены, что хотите выйти?")) {
+        currentUser = null;
+        localStorage.removeItem(CURRENT_USER_KEY);
+        document.getElementById('auth-screen').classList.remove('hidden');
+        document.getElementById('main-interface').classList.add('hidden');
+        document.getElementById('login-name').value = '';
+        document.getElementById('login-pass').value = '';
+        showAuthTab('login');
+    }
+}
+
+function getUsers() {
+    const data = localStorage.getItem(USERS_KEY);
+    return data ? JSON.parse(data) : [];
+}
+
+function saveCurrentUser() {
+    if (!currentUser) return;
+    
+    const users = getUsers();
+    const index = users.findIndex(u => u.username === currentUser.username);
+    
+    if (index !== -1) {
+        users[index] = currentUser;
+        localStorage.setItem(USERS_KEY, JSON.stringify(users));
+        localStorage.setItem(CURRENT_USER_KEY, JSON.stringify(currentUser));
+    }
+}
+
+function showMainInterface() {
+    document.getElementById('auth-screen').classList.add('hidden');
+    document.getElementById('main-interface').classList.remove('hidden');
+}
+
+/** ОБНОВЛЕНИЕ ИНТЕРФЕЙСА **/
+function showPage(pageId) {
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.getElementById('page-' + pageId).classList.add('active');
+    
+    if (pageId === 'leaderboard') {
+        renderLeaderboards();
+    } else if (pageId === 'inventory') {
+        renderInventory();
+        updateInventoryValue();
+    }
+}
+
+function updateUI() {
+    if (!currentUser) return;
+    
+    document.getElementById('username-display').textContent = currentUser.username;
+    updateBalances();
+    renderCases();
+    renderInventory();
+    updateInventoryValue();
+}
+
+function updateBalances() {
+    if (!currentUser) return;
+    
+    document.getElementById('bal-vbr').innerText = Math.floor(currentUser.vbr).toLocaleString();
+    document.getElementById('bal-vbt').innerText = Math.floor(currentUser.vbt).toLocaleString();
+}
+
+/** СИСТЕМА КЕЙСОВ **/
+function renderCases() {
+    const container = document.getElementById('cases-list');
+    container.innerHTML = '';
+    CASES.forEach(c => {
+        const div = document.createElement('div');
+        div.className = 'statue-card r-rare';
+        div.innerHTML = `
+            <span class="icon">📦</span>
+            <b>${c.name}</b><br>
+            <span class="price">${c.price} ₱</span>
+            <div class="case-preview">
+                ${c.items.map(id => `<span title="${ITEMS.find(i=>i.id===id).name}">${ITEMS.find(i=>i.id===id).icon}</span>`).join('')}
+            </div>
+            <button onclick="prepareOpening('${c.id}')">Открыть</button>
+        `;
+        container.appendChild(div);
+    });
+}
+
+function prepareOpening(caseId) {
+    if (!currentUser) return;
+    
+    const selectedCase = CASES.find(c => c.id === caseId);
+    if(currentUser.vbr < selectedCase.price) return alert("Недостаточно ВБР!");
+    
+    document.getElementById('opening-section').style.display = 'block';
+    document.getElementById('current-case-name').innerText = "Открытие: " + selectedCase.name;
+    
+    const track = document.getElementById('roulette-track');
+    track.style.transition = 'none';
+    track.style.transform = 'translateX(0)';
+    track.innerHTML = '';
+
+    // Генерируем 80 предметов для ленты
+    const tape = [];
+    for(let i=0; i<80; i++) {
+        const randId = selectedCase.items[Math.floor(Math.random() * selectedCase.items.length)];
+        const item = ITEMS.find(it => it.id === randId);
+        tape.push(item);
+        
+        const card = document.createElement('div');
+        card.className = 'statue-card r-' + item.rarity;
+        card.style.minWidth = '130px';
+        card.style.margin = '0 5px';
+        card.innerHTML = `<span class="icon">${item.icon}</span><small>${item.name}</small>`;
+        track.appendChild(card);
+    }
+
+    document.getElementById('btn-open-action').onclick = () => {
+        if(isOpening) return;
+        isOpening = true;
+        currentUser.vbr -= selectedCase.price;
+        updateBalances();
+
+        const itemWidth = 140; // 130 + 10 margin
+        const winIndex = 75; // Выигрышный предмет
+        const stopPos = (winIndex * itemWidth) - (document.querySelector('.roulette-wrapper').offsetWidth / 2) + (itemWidth / 2);
+        const randomOffset = (Math.random() - 0.5) * 100;
+        
+        track.style.transition = 'transform 5s cubic-bezier(0.1, 0, 0.1, 1)';
+        track.style.transform = `translateX(-${stopPos + randomOffset}px)`;
+
+        setTimeout(() => {
+            const winItem = tape[winIndex];
+            alert(`Вам выпало: ${winItem.name}!`);
+            currentUser.inventory.push({...winItem, uid: Date.now()});
+            isOpening = false;
+            saveCurrentUser();
+            renderInventory();
+            updateInventoryValue();
+        }, 5200);
+    };
+}
+
+/** ИНВЕНТАРЬ **/
+function renderInventory() {
+    const inv = document.getElementById('inventory-list');
+    inv.innerHTML = '';
+    
+    if (!currentUser || !currentUser.inventory.length) {
+        inv.innerHTML = '<div style="grid-column: 1 / -1; text-align: center; padding: 40px; color: #777;">Инвентарь пуст</div>';
+        return;
+    }
+    
+    currentUser.inventory.forEach(item => {
+        const div = document.createElement('div');
+        div.className = `statue-card r-${item.rarity}`;
+        div.innerHTML = `<span class="icon">${item.icon}</span><b>${item.name}</b><br><span class="price">${item.price} ₱</span>`;
+        inv.appendChild(div);
+    });
+}
+
+function updateInventoryValue() {
+    if (!currentUser) return;
+    
+    const totalValue = currentUser.inventory.reduce((sum, item) => sum + item.price, 0);
+    document.getElementById('inventory-value').textContent = totalValue.toLocaleString();
+}
+
+/** АПГРЕЙДЕР **/
+function openPicker(type) {
+    if (!currentUser) return;
+    
+    const modal = document.getElementById('picker-modal');
+    const grid = document.getElementById('picker-grid');
+    modal.style.display = 'flex';
+    grid.innerHTML = '';
+
+    if(type === 'my') {
+        if (!currentUser.inventory.length) {
+            grid.innerHTML = '<div style="text-align: center; padding: 20px; color: #777;">Инвентарь пуст</div>';
+            return;
+        }
+        
+        currentUser.inventory.forEach(item => {
+            const d = document.createElement('div');
+            d.className = `statue-card r-${item.rarity}`;
+            d.innerHTML = `<span class="icon">${item.icon}</span><p>${item.name}</p>`;
+            d.onclick = () => { currentUpgSource = item; updateUpgUI(); closePicker(); };
+            grid.appendChild(d);
+        });
+    } else {
+        ITEMS.forEach(item => {
+            const d = document.createElement('div');
+            d.className = `statue-card r-${item.rarity}`;
+            d.innerHTML = `<span class="icon">${item.icon}</span><p>${item.name}</p><b class="price">${item.price} ₱</b>`;
+            d.onclick = () => { currentUpgTarget = item; updateUpgUI(); closePicker(); };
+            grid.appendChild(d);
+        });
+    }
+}
+
+function updateUpgUI() {
+    if(currentUpgSource) {
+        document.getElementById('upg-source').innerHTML = `<span class="icon">${currentUpgSource.icon}</span><p>${currentUpgSource.name}</p>`;
+    }
+    if(currentUpgTarget) {
+        document.getElementById('upg-target').innerHTML = `<span class="icon">${currentUpgTarget.icon}</span><p>${currentUpgTarget.name}</p><b>${currentUpgTarget.price} ₱</b>`;
+    }
+    
+    if(currentUpgSource && currentUpgTarget) {
+        let chance = (currentUpgSource.price / currentUpgTarget.price) * 100;
+        if(chance > 100) chance = 100;
+        document.getElementById('chance-text').innerText = chance.toFixed(1) + "%";
+        document.getElementById('wheel-segment').style.strokeDasharray = `${chance} 100`;
+    }
+}
+
+function startUpgrade() {
+    if(!currentUser) return;
+    if(!currentUpgSource || !currentUpgTarget) return alert("Выберите оба предмета!");
+    
+    // Найти предмет в инвентаре по uid
+    const sourceInInventory = currentUser.inventory.find(i => i.uid === currentUpgSource.uid);
+    if (!sourceInInventory) {
+        alert("Предмет не найден в инвентаре!");
+        return;
+    }
+    
+    if(sourceInInventory.price >= currentUpgTarget.price && sourceInInventory.id === currentUpgTarget.id) {
+        return alert("Выберите цель подороже!");
+    }
+
+    const chance = (sourceInInventory.price / currentUpgTarget.price) * 100;
+    const arrow = document.getElementById('upg-arrow');
+    const fullSpins = 5 + Math.floor(Math.random() * 5);
+    const randomDeg = Math.random() * 360;
+    const totalDeg = (fullSpins * 360) + randomDeg;
+
+    arrow.style.transform = `rotate(${totalDeg}deg)`;
+
+    setTimeout(() => {
+        const finalAngle = randomDeg;
+        const winRange = (chance / 100) * 360;
+        
+        if(finalAngle <= winRange) {
+            alert("УСПЕХ! Вы получили " + currentUpgTarget.name);
+            currentUser.inventory.push({...currentUpgTarget, uid: Date.now()});
+        } else {
+            alert("НЕУДАЧА! Предмет потерян.");
+        }
+        
+        currentUser.inventory = currentUser.inventory.filter(i => i.uid !== sourceInInventory.uid);
+        currentUpgSource = null;
+        updateUpgUI();
+        updateBalances();
+        updateInventoryValue();
+        saveCurrentUser();
+    }, 4100);
+}
+
+/** ОБМЕННИК **/
+function exchangeVBTtoVBR() {
+    if (!currentUser) return;
+    
+    const amt = parseFloat(document.getElementById('exch-amount').value);
+    if(currentUser.vbt >= amt && amt > 0) {
+        currentUser.vbt -= amt;
+        currentUser.vbr += (amt * 2.32);
+        updateBalances();
+        saveCurrentUser();
+        document.getElementById('exch-amount').value = '';
+    } else {
+        alert("Недостаточно ВБТ!");
+    }
+}
+
+/** ЛИДЕРБОРД **/
+function renderLeaderboards() {
+    const users = getUsers();
+    
+    // Рассчитываем общий баланс для каждого пользователя
+    const moneyRanking = users.map(user => {
+        const totalMoney = user.vbr + (user.vbt * 2.32); // Переводим ВБТ в ВБР
+        return {
+            username: user.username,
+            total: totalMoney,
+            vbr: user.vbr,
+            vbt: user.vbt
+        };
+    }).sort((a, b) => b.total - a.total);
+    
+    // Рассчитываем стоимость инвентаря для каждого пользователя
+    const inventoryRanking = users.map(user => {
+        const inventoryValue = user.inventory.reduce((sum, item) => sum + item.price, 0);
+        return {
+            username: user.username,
+            value: inventoryValue
+        };
+    }).sort((a, b) => b.value - a.value);
+    
+    // Обновляем таблицу по деньгам
+    const moneyTable = document.getElementById('leaderboard-money');
+    moneyTable.innerHTML = '';
+    
+    moneyRanking.forEach((user, index) => {
+        const tr = document.createElement('tr');
+        let medalClass = '';
+        if (index === 0) medalClass = 'medal-1';
+        else if (index === 1) medalClass = 'medal-2';
+        else if (index === 2) medalClass = 'medal-3';
+        
+        tr.innerHTML = `
+            <td class="${medalClass}">${index + 1}</td>
+            <td>${user.username}</td>
+            <td><b>${Math.floor(user.total).toLocaleString()} ₱</b><br>
+                <small>(${Math.floor(user.vbr).toLocaleString()} ₱ + ${Math.floor(user.vbt).toLocaleString()} ₸)</small>
+            </td>
+        `;
+        moneyTable.appendChild(tr);
+        
+        // Сохраняем место текущего пользователя
+        if (currentUser && user.username === currentUser.username) {
+            document.getElementById('user-money-rank').textContent = index + 1;
+        }
+    });
+    
+    // Обновляем таблицу по инвентарю
+    const inventoryTable = document.getElementById('leaderboard-inventory');
+    inventoryTable.innerHTML = '';
+    
+    inventoryRanking.forEach((user, index) => {
+        const tr = document.createElement('tr');
+        let medalClass = '';
+        if (index === 0) medalClass = 'medal-1';
+        else if (index === 1) medalClass = 'medal-2';
+        else if (index === 2) medalClass = 'medal-3';
+        
+        tr.innerHTML = `
+            <td class="${medalClass}">${index + 1}</td>
+            <td>${user.username}</td>
+            <td><b>${Math.floor(user.value).toLocaleString()} ₱</b></td>
+        `;
+        inventoryTable.appendChild(tr);
+        
+        // Сохраняем место текущего пользователя
+        if (currentUser && user.username === currentUser.username) {
+            document.getElementById('user-inventory-rank').textContent = index + 1;
+        }
+    });
+    
+    // Если текущий пользователь не найден в рейтингах
+    if (currentUser && !moneyRanking.find(u => u.username === currentUser.username)) {
+        document.getElementById('user-money-rank').textContent = '-';
+        document.getElementById('user-inventory-rank').textContent = '-';
+    }
+}
+
+/** ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ **/
+function closePicker() { 
+    document.getElementById('picker-modal').style.display = 'none'; 
+}
+
+/** ИНИЦИАЛИЗАЦИЯ **/
+function init() {
+    // Проверяем, есть ли сохранённый пользователь
+    const savedUser = localStorage.getItem(CURRENT_USER_KEY);
+    if (savedUser) {
+        try {
+            currentUser = JSON.parse(savedUser);
+            // Проверяем, существует ли пользователь в базе
+            const users = getUsers();
+            const userExists = users.find(u => u.username === currentUser.username && u.password === currentUser.password);
+            
+            if (userExists) {
+                // Обновляем данные текущего пользователя из базы
+                currentUser = userExists;
+                showMainInterface();
+                updateUI();
+            } else {
+                // Пользователь не найден, очищаем данные
+                localStorage.removeItem(CURRENT_USER_KEY);
+                currentUser = null;
+            }
+        } catch (e) {
+            console.error("Ошибка загрузки пользователя:", e);
+            currentUser = null;
+        }
+    }
+    
+    // Показываем форму входа, если пользователь не авторизован
+    if (!currentUser) {
+        document.getElementById('auth-screen').classList.remove('hidden');
+        document.getElementById('main-interface').classList.add('hidden');
+    }
+}
+
+// Запускаем инициализацию при загрузке страницы
+window.onload = init;
+</script>
+</body>
+</html>
